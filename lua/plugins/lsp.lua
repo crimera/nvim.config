@@ -25,7 +25,9 @@ return {
 			"clangd",
 			"zls",
 			"nil_ls",
-			"ruff"
+			"ruff",
+			"ty",
+			"sourcekit"
 		}
 
 		for _, server in pairs(servers) do
