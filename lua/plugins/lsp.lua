@@ -27,19 +27,13 @@ return {
 			"nil_ls",
 			"ruff",
 			"ty",
-			"sourcekit"
+			"sourcekit",
+			"kotlin_lsp",
+			"lua_ls",
 		}
 
 		for _, server in pairs(servers) do
-			if type(server) == "table" then
-				require("lspconfig")[server[1]].setup(vim.tbl_extend("force", {
-					capabilities = capabilities,
-				}, server.opts))
-			else
-				require("lspconfig")[server].setup({
-					capabilities = capabilities,
-				})
-			end
+			vim.lsp.enable(server)
 		end
 	end,
 }
