@@ -32,6 +32,8 @@ return {
 			"lua_ls",
 		}
 
+		vim.keymap.set("n", "<leader>F", vim.lsp.buf.format, { desc = "[F]ormat file" })
+
 		for _, server in pairs(servers) do
 			vim.lsp.enable(server)
 		end
