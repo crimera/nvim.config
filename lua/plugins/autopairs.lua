@@ -1,4 +1,5 @@
 return {
-	"windwp/nvim-autopairs",
+	"echasnovski/mini.pairs",
+	version = '*',
 	opts = {}
 }
