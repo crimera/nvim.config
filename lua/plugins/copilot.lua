@@ -7,10 +7,10 @@ return {
 					enabled = true,
 					auto_trigger = true,
 					keymap = {
-						accept = "<Tab>",
-					},
+						accept = "<c-l>",
+					}
 				},
 			})
 		end,
-	}, -- or github/copilot.vim
+	},
 }
