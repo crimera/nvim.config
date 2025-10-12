@@ -27,8 +27,8 @@ vim.opt.signcolumn = "yes"
 -- Show which line your cursor is on
 vim.opt.cursorline = true
 
-vim.opt.shiftwidth = 4
-vim.opt.tabstop = 4
+vim.opt.shiftwidth = 2
+vim.opt.tabstop = 2
 
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true
