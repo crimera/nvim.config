@@ -129,6 +129,12 @@ vim.lsp.enable('nil_ls')
 vim.lsp.enable('lua_ls')
 vim.lsp.enable('ty')
 vim.lsp.enable('ruff')
+vim.lsp.enable('vtsls')
+vim.lsp.enable('tailwindcss')
+vim.lsp.enable('cssls')
+vim.lsp.enable('eslint')
+vim.lsp.enable('html')
+vim.lsp.enable('jsonls')
 -- LSP
 
 -- Mini Pick

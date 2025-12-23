@@ -16,6 +16,9 @@
         ty # python typechecker
         ruff # python linter and formatter
         lua-language-server
+        vtsls # typescript
+        tailwindcss-language-server
+        vscode-langservers-extracted # html, css, json, eslint
       ];
 
       # Define your custom Neovim
