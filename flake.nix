@@ -8,45 +8,52 @@
   outputs =
     { self, nixpkgs }:
     let
-      system = "aarch64-darwin"; # Use "aarch64-darwin" for Apple Silicon Macs
-      pkgs = nixpkgs.legacyPackages.${system};
-
-      extraPackages = with pkgs; [
-        nil # Nix LSP
-        ty # python typechecker
-        ruff # python linter and formatter
-        lua-language-server
-        vtsls # typescript
-        tailwindcss-language-server
-        vscode-langservers-extracted # html, css, json, eslint
-      ];
-
-      # Define your custom Neovim
-      myNeovim = pkgs.neovim.override {
-        configure = {
-          # Load your init.lua from the same directory
-          customRC = ''
-            luafile ${./init.lua}
-          '';
-
-          # Add plugins here from nixpkgs
-          packages.myVimPackage = with pkgs.vimPlugins; {
-            start = [
-              tokyonight-nvim
-              vim-nix
-              mini-pick
-              nvim-treesitter.withAllGrammars
-              nvim-lspconfig
-            ];
-          };
-        };
-        extraMakeWrapperArgs = pkgs.lib.concatStringsSep " " [
-          "--suffix" "PATH" ":" (pkgs.lib.makeBinPath extraPackages)
-        ];
-
-      };
+      systems = [ "aarch64-darwin" "aarch64-linux" ];
+      forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f system);
     in
     {
-      packages.${system}.default = myNeovim;
+      packages = forAllSystems (system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+
+          extraPackages = with pkgs; [
+            nil # Nix LSP
+            ty # python typechecker
+            ruff # python linter and formatter
+            lua-language-server
+            vtsls # typescript
+            tailwindcss-language-server
+            vscode-langservers-extracted # html, css, json, eslint
+          ];
+
+          # Define your custom Neovim
+          myNeovim = pkgs.neovim.override {
+            configure = {
+              # Load your init.lua from the same directory
+              customRC = ''
+                luafile ${./init.lua}
+              '';
+
+              # Add plugins here from nixpkgs
+              packages.myVimPackage = with pkgs.vimPlugins; {
+                start = [
+                  tokyonight-nvim
+                  vim-nix
+                  mini-pick
+                  nvim-treesitter.withAllGrammars
+                  nvim-lspconfig
+                ];
+              };
+            };
+            extraMakeWrapperArgs = pkgs.lib.concatStringsSep " " [
+              "--suffix" "PATH" ":" (pkgs.lib.makeBinPath extraPackages)
+            ];
+
+          };
+        in
+        {
+          default = myNeovim;
+        }
+      );
     };
 }
