@@ -22,7 +22,7 @@ vim.opt.ignorecase = true
 vim.opt.smartcase = true
 
 -- Keep signcolumn on by default
-vim.opt.signcolumn = "auto"
+vim.opt.signcolumn = "yes"
 
 -- Show which line your cursor is on
 vim.opt.cursorline = true
