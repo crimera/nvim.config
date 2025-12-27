@@ -23,6 +23,7 @@
             lua-language-server
             vtsls # typescript
             tailwindcss-language-server
+            oxlint # eslint replacement
             vscode-langservers-extracted # html, css, json, eslint
           ];
 

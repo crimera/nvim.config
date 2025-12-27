@@ -132,7 +132,7 @@ vim.lsp.enable('ruff')
 vim.lsp.enable('vtsls')
 vim.lsp.enable('tailwindcss')
 vim.lsp.enable('cssls')
-vim.lsp.enable('eslint')
+vim.lsp.enable('oxlint')
 vim.lsp.enable('html')
 vim.lsp.enable('jsonls')
 -- LSP
