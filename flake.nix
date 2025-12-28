@@ -41,6 +41,7 @@
                   tokyonight-nvim
                   vim-nix
                   mini-pick
+                  mini-files
                   nvim-treesitter.withAllGrammars
                   nvim-lspconfig
                 ];

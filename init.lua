@@ -1,4 +1,4 @@
--- got from the nvim-tree docs
+-- netrw disabled for mini.files
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
@@ -136,6 +136,24 @@ vim.lsp.enable('oxlint')
 vim.lsp.enable('html')
 vim.lsp.enable('jsonls')
 -- LSP
+
+-- Mini Files
+require("mini.files").setup({
+  windows = {
+    preview = true,
+    width_focus = 30,
+    width_nofocus = 15,
+    width_preview = 40,
+  },
+  options = {
+    use_as_default_explorer = true,
+  },
+})
+
+vim.keymap.set("n", "<leader>e", function()
+  MiniFiles.open(vim.api.nvim_buf_get_name(0))
+end, { desc = "Open file explorer" })
+-- Mini Files
 
 -- Mini Pick
 local win_config = function()
