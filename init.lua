@@ -212,10 +212,10 @@ vim.api.nvim_create_autocmd('LspAttach', {
 	end,
 })
 
--- 4. Auto-trigger Menu
+-- 4. Auto-trigger Menu (only when omnifunc is set)
 vim.api.nvim_create_autocmd("InsertCharPre", {
 	callback = function()
-		if vim.fn.pumvisible() == 0 then
+		if vim.fn.pumvisible() == 0 and vim.bo.omnifunc ~= "" then
 			local char = vim.v.char
 			if char:match("[%w%.]") then
 				vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-x><C-o>", true, false, true), "n", false)
