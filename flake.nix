@@ -38,7 +38,7 @@
               # Add plugins here from nixpkgs
               packages.myVimPackage = with pkgs.vimPlugins; {
                 start = [
-                  tokyonight-nvim
+                  gruvbox-nvim
                   vim-nix
                   mini-pick
                   mini-files

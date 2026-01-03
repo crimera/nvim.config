@@ -69,15 +69,12 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 
 -- Theme
 
-require("tokyonight").setup({
-	transparent = true,
-	styles = {
-		sidebars = "transparent", -- Make sidebars transparent
-		floats = "transparent", -- Make floating windows transparent
-	},
+require("gruvbox").setup({
+	transparent_mode = false,
 })
 
-vim.cmd.colorscheme("tokyonight-night")
+vim.opt.background = "light"
+vim.cmd.colorscheme("gruvbox")
 
 -- transparency
 vim.cmd([[
@@ -139,19 +136,19 @@ vim.lsp.enable('jsonls')
 
 -- Mini Files
 require("mini.files").setup({
-  windows = {
-    preview = true,
-    width_focus = 30,
-    width_nofocus = 15,
-    width_preview = 40,
-  },
-  options = {
-    use_as_default_explorer = true,
-  },
+	windows = {
+		preview = true,
+		width_focus = 30,
+		width_nofocus = 15,
+		width_preview = 40,
+	},
+	options = {
+		use_as_default_explorer = true,
+	},
 })
 
 vim.keymap.set("n", "<leader>e", function()
-  MiniFiles.open(vim.api.nvim_buf_get_name(0))
+	MiniFiles.open(vim.api.nvim_buf_get_name(0))
 end, { desc = "Open file explorer" })
 -- Mini Files
 
