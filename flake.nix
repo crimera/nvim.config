@@ -17,7 +17,7 @@
           pkgs = nixpkgs.legacyPackages.${system};
 
           extraPackages = with pkgs; [
-            nil # Nix LSP
+            nixd # Nix LSP
             ty # python typechecker
             ruff # python linter and formatter
             lua-language-server

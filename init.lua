@@ -122,7 +122,7 @@ end, { desc = "New terminal tab" })
 -- LSP
 vim.keymap.set('n', '<leader>F', vim.lsp.buf.format)
 
-vim.lsp.enable('nil_ls')
+vim.lsp.enable('nixd')
 vim.lsp.enable('lua_ls')
 vim.lsp.enable('ty')
 vim.lsp.enable('ruff')
