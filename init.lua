@@ -68,18 +68,19 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 })
 
 -- Theme
-
 require("gruvbox").setup({
 	transparent_mode = false,
+	palette_overrides = {
+		dark0 = "#000000", -- AMOLED black background
+	}
 })
-
 vim.opt.background = "dark"
 vim.cmd.colorscheme("gruvbox")
 
--- transparency
+-- AMOLED black background for UI elements
 vim.cmd([[
-	highlight Normal guibg=none
-	highlight NonText guibg=none
+	highlight Normal guibg=#000000
+	highlight NonText guibg=#000000
 	highlight Normal ctermbg=none
 	highlight NonText ctermbg=none
 ]])
@@ -132,6 +133,7 @@ vim.lsp.enable('cssls')
 vim.lsp.enable('oxlint')
 vim.lsp.enable('html')
 vim.lsp.enable('jsonls')
+vim.lsp.enable('zls')
 -- LSP
 
 -- Mini Files

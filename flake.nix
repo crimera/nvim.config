@@ -25,6 +25,7 @@
             tailwindcss-language-server
             oxlint # eslint replacement
             vscode-langservers-extracted # html, css, json, eslint
+            zls # zig
           ];
 
           # Define your custom Neovim
