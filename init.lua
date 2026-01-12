@@ -68,6 +68,9 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 })
 
 -- Theme
+
+vim.opt.cmdheight = 0
+
 require("gruvbox").setup({
 	transparent_mode = false,
 	palette_overrides = {
