@@ -43,6 +43,8 @@
                   vim-nix
                   mini-pick
                   mini-files
+                  gitsigns-nvim  # Line-level git signs with highlighting
+                  mini-git       # Git integration for status data
                   nvim-treesitter.withAllGrammars
                   nvim-lspconfig
                 ];

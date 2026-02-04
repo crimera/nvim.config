@@ -108,6 +108,24 @@ vim.api.nvim_set_hl(0, "TabLineFill", {
 	underline = true, -- Bottom border for empty tabline space
 	sp = "#4e4e4e",  -- Same underline color
 })
+
+-- Git status highlight groups for mini.files
+vim.api.nvim_set_hl(0, "MiniFilesGitModified", { fg = "#fabd2f", bold = true })  -- Yellow
+vim.api.nvim_set_hl(0, "MiniFilesGitUntracked", { fg = "#b8bb26", bold = true })  -- Green
+vim.api.nvim_set_hl(0, "MiniFilesGitDeleted", { fg = "#fb4934", bold = true })     -- Red
+vim.api.nvim_set_hl(0, "MiniFilesGitAdded", { fg = "#8ec07c", bold = true })       -- Light green
+vim.api.nvim_set_hl(0, "MiniFilesGitRenamed", { fg = "#d3869b", bold = true })    -- Purple
+
+-- Gitsigns highlight groups for line/number highlighting
+vim.api.nvim_set_hl(0, "GitSignsAdd", { fg = "#b8bb26", bg = "#1a1a1a" })           -- Green
+vim.api.nvim_set_hl(0, "GitSignsChange", { fg = "#fabd2f", bg = "#1a1a1a" })       -- Yellow
+vim.api.nvim_set_hl(0, "GitSignsDelete", { fg = "#fb4934", bg = "#1a1a1a" })         -- Red
+vim.api.nvim_set_hl(0, "GitSignsAddLn", { bg = "#1a2a1a" })                          -- Dark green bg
+vim.api.nvim_set_hl(0, "GitSignsChangeLn", { bg = "#2a2a1a" })                       -- Dark yellow bg
+vim.api.nvim_set_hl(0, "GitSignsDeleteLn", { bg = "#2a1a1a" })                        -- Dark red bg
+vim.api.nvim_set_hl(0, "GitSignsAddNr", { fg = "#b8bb26", bold = true })             -- Green line number
+vim.api.nvim_set_hl(0, "GitSignsChangeNr", { fg = "#fabd2f", bold = true })          -- Yellow line number
+vim.api.nvim_set_hl(0, "GitSignsDeleteNr", { fg = "#fb4934", bold = true })          -- Red line number
 -- Theme
 
 -- tabs
@@ -139,7 +157,149 @@ vim.lsp.enable('jsonls')
 vim.lsp.enable('zls')
 -- LSP
 
--- Mini Files
+-- Mini Git (provides git status data)
+require("mini.git").setup({})
+
+-- Gitsigns (line-level git signs with highlighting)
+require("gitsigns").setup({
+	signs = {
+		add = { text = '+' },
+		change = { text = '~' },
+		delete = { text = '-' },
+		topdelete = { text = '‾' },
+		changedelete = { text = '~' },
+	},
+	-- Enable line number highlighting
+	numhl = true,
+	-- Enable line highlighting (colors the entire line background)
+	linehl = true,
+	-- Enable word diff in virtual text (inline word-level highlighting)
+	word_diff = true,
+	on_attach = function(bufnr)
+		local gs = package.loaded.gitsigns
+		
+		-- Navigation
+		vim.keymap.set('n', ']h', function()
+			if vim.wo.diff then return ']h' end
+			vim.schedule(function() gs.next_hunk() end)
+			return '<Ignore>'
+		end, { expr = true, buffer = bufnr, desc = "Next hunk" })
+		
+		vim.keymap.set('n', '[h', function()
+			if vim.wo.diff then return '[h' end
+			vim.schedule(function() gs.prev_hunk() end)
+			return '<Ignore>'
+		end, { expr = true, buffer = bufnr, desc = "Previous hunk" })
+		
+		-- Actions
+		vim.keymap.set('n', '<leader>hs', gs.stage_hunk, { buffer = bufnr, desc = "Stage hunk" })
+		vim.keymap.set('n', '<leader>hr', gs.reset_hunk, { buffer = bufnr, desc = "Reset hunk" })
+		vim.keymap.set('v', '<leader>hs', function() gs.stage_hunk { vim.fn.line('.'), vim.fn.line('v') } end, { buffer = bufnr, desc = "Stage hunk" })
+		vim.keymap.set('v', '<leader>hr', function() gs.reset_hunk { vim.fn.line('.'), vim.fn.line('v') } end, { buffer = bufnr, desc = "Reset hunk" })
+		vim.keymap.set('n', '<leader>hS', gs.stage_buffer, { buffer = bufnr, desc = "Stage buffer" })
+		vim.keymap.set('n', '<leader>hu', gs.undo_stage_hunk, { buffer = bufnr, desc = "Undo stage hunk" })
+		vim.keymap.set('n', '<leader>hR', gs.reset_buffer, { buffer = bufnr, desc = "Reset buffer" })
+		vim.keymap.set('n', '<leader>hp', gs.preview_hunk, { buffer = bufnr, desc = "Preview hunk" })
+		vim.keymap.set('n', '<leader>hb', function() gs.blame_line { full = true } end, { buffer = bufnr, desc = "Blame line" })
+		vim.keymap.set('n', '<leader>tb', gs.toggle_current_line_blame, { buffer = bufnr, desc = "Toggle line blame" })
+		vim.keymap.set('n', '<leader>hd', gs.diffthis, { buffer = bufnr, desc = "Diff this" })
+		vim.keymap.set('n', '<leader>hD', function() gs.diffthis('~') end, { buffer = bufnr, desc = "Diff this ~" })
+		vim.keymap.set('n', '<leader>td', gs.toggle_deleted, { buffer = bufnr, desc = "Toggle deleted" })
+	end,
+})
+
+-- Mini Files with Git Status Indicators
+-- Git status cache per directory to avoid blocking UI
+local git_status_cache = {}
+
+-- Helper: Get git status for all files in a directory
+local function update_git_status_cache(dir_path)
+	local status_map = {}
+	local handle = io.popen('git -C "' .. dir_path .. '" status --porcelain 2>/dev/null')
+	if handle then
+		for line in handle:lines() do
+			-- Parse porcelain format: XY filename
+			-- X = index status, Y = working tree status
+			local status = line:sub(1, 2)
+			local filename = line:sub(4)
+			status_map[dir_path .. "/" .. filename] = {
+				index = status:sub(1, 1),
+				worktree = status:sub(2, 2)
+			}
+		end
+		handle:close()
+	end
+	git_status_cache[dir_path] = status_map
+end
+
+-- Get status for a specific file (uses cache)
+local function get_file_git_status(file_path)
+	local dir = vim.fn.fnamemodify(file_path, ":h")
+	
+	-- Update cache if needed
+	if not git_status_cache[dir] then
+		update_git_status_cache(dir)
+	end
+	
+	local cache = git_status_cache[dir] or {}
+	local file_status = cache[file_path]
+	
+	if not file_status then return nil end
+	
+	-- Determine overall status (prioritize worktree over index)
+	local wt = file_status.worktree
+	local idx = file_status.index
+	
+	if wt == "M" or idx == "M" then return "modified" end
+	if wt == "?" or idx == "?" then return "untracked" end
+	if wt == "D" or idx == "D" then return "deleted" end
+	if wt == "A" or idx == "A" then return "added" end
+	if wt == "R" or idx == "R" then return "renamed" end
+	
+	return nil
+end
+
+-- Custom prefix: Git status icon + file icon
+local git_prefix = function(fs_entry)
+	local icon, hl = MiniFiles.default_prefix(fs_entry)
+	local status = get_file_git_status(fs_entry.path)
+	
+	-- Git status indicators
+	local git_icons = {
+		modified = "✗ ",
+		untracked = "+ ",
+		deleted = "- ",
+		added = "✓ ",
+		renamed = "→ ",
+	}
+	
+	local git_hls = {
+		modified = "MiniFilesGitModified",
+		untracked = "MiniFilesGitUntracked",
+		deleted = "MiniFilesGitDeleted",
+		added = "MiniFilesGitAdded",
+		renamed = "MiniFilesGitRenamed",
+	}
+	
+	if status then
+		return git_icons[status] .. icon, git_hls[status]
+	end
+	
+	return icon, hl
+end
+
+-- Custom highlight: Color filename based on git status
+local git_highlight = function(fs_entry)
+	local base_hl = MiniFiles.default_highlight(fs_entry)
+	local status = get_file_git_status(fs_entry.path)
+	
+	if status then
+		return "MiniFilesGit" .. status:gsub("^%l", string.upper)
+	end
+	
+	return base_hl
+end
+
 require("mini.files").setup({
 	windows = {
 		preview = true,
@@ -149,6 +309,10 @@ require("mini.files").setup({
 	},
 	options = {
 		use_as_default_explorer = true,
+	},
+	content = {
+		prefix = git_prefix,      -- Add git status icons
+		highlight = git_highlight, -- Color files by git status
 	},
 })
 
