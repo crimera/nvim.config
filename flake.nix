@@ -26,6 +26,7 @@
             oxlint # eslint replacement
             vscode-langservers-extracted # html, css, json, eslint
             zls # zig
+            rust-analyzer
           ];
 
           # Define your custom Neovim

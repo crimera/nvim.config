@@ -155,6 +155,7 @@ vim.lsp.enable('oxlint')
 vim.lsp.enable('html')
 vim.lsp.enable('jsonls')
 vim.lsp.enable('zls')
+vim.lsp.enable('rust_analyzer')
 -- LSP
 
 -- Mini Git (provides git status data)
