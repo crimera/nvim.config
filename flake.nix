@@ -48,6 +48,8 @@
                   mini-git       # Git integration for status data
                   nvim-treesitter.withAllGrammars
                   nvim-lspconfig
+                  blink-cmp              # Completion plugin
+                  friendly-snippets      # Snippet collection
                 ];
               };
             };

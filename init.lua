@@ -346,72 +346,57 @@ vim.keymap.set('n', '<leader>f', ":Pick grep_live<CR>")
 vim.keymap.set('n', '<leader> ', ":Pick buffers<CR>")
 -- Mini Pick
 
--- AutoComplete
--- 1. Global UI & Behavior Settings
-vim.opt.completeopt = { "menu", "menuone", "noinsert" }
-vim.opt.pumheight = 10 -- LIMIT HEIGHT: Only show 10 items (still scrollable)
-vim.opt.shortmess:append("c")
+-- Completion (blink.cmp)
+require("blink.cmp").setup({
+	keymap = {
+		preset = "enter",  -- Enter to accept completion
+		["<Tab>"] = { "select_next", "fallback" },
+		["<S-Tab>"] = { "select_prev", "fallback" },
+	},
 
--- 2. Smart Filtering Omnifunc
--- This wraps the standard LSP omnifunc to filter out noise
-_G.filtered_omnifunc = function(findstart, base)
-	local res = vim.lsp.omnifunc(findstart, base)
-	if findstart == 0 and type(res) == 'table' and res.items then
-		local filtered = {}
-		for _, item in ipairs(res.items) do
-			-- Filter out 'Text' (1) and 'Snippet' (15)
-			-- You can add more IDs to exclude here
-			local kind = item.user_data and item.user_data.nvim and item.user_data.nvim.lsp and
-					item.user_data.nvim.lsp.completion_item.kind
-			if kind ~= 1 and kind ~= 15 then
-				table.insert(filtered, item)
-			end
-		end
-		res.items = filtered
-	end
-	return res
-end
+	appearance = {
+		nerd_font_variant = "mono",
+	},
 
--- 3. Apply to LSP buffers
-vim.api.nvim_create_autocmd('LspAttach', {
-	callback = function(args)
-		vim.bo[args.buf].omnifunc = 'v:lua.filtered_omnifunc'
-	end,
+	completion = {
+		documentation = { auto_show = true },
+		menu = {
+			max_height = 10,  -- Limit popup height to 10 items
+		},
+		accept = {
+			auto_brackets = { enabled = true },  -- Smart bracket insertion
+		},
+		list = {
+			selection = {
+				preselect = true,       -- Auto-select first item
+				auto_insert = false,    -- Don't auto-insert until Enter is pressed
+			},
+		},
+	},
+
+	sources = {
+		default = { "lsp", "path", "snippets", "buffer" },
+		-- Filter out unwanted completion kinds (Text and Snippet)
+		providers = {
+			lsp = {
+				transform_items = function(_, items)
+					-- Filter out Text (1) and Snippet (15) completion kinds
+					return vim.tbl_filter(function(item)
+						local kind = item.kind
+						return kind ~= 1 and kind ~= 15
+					end, items)
+				end,
+			},
+		},
+	},
+
+	signature = { enabled = false },
+
+	fuzzy = {
+		implementation = "prefer_rust_with_warning",  -- Fast Rust-based fuzzy matching
+	},
 })
-
--- 4. Auto-trigger Menu (only when omnifunc is set)
-vim.api.nvim_create_autocmd("InsertCharPre", {
-	callback = function()
-		if vim.fn.pumvisible() == 0 and vim.bo.omnifunc ~= "" then
-			local char = vim.v.char
-			if char:match("[%w%.]") then
-				vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-x><C-o>", true, false, true), "n", false)
-			end
-		end
-	end,
-})
-
--- 5. Keymaps (Enter & Tab)
-vim.keymap.set('i', '<CR>', function()
-	if vim.fn.pumvisible() ~= 0 then
-		if vim.fn.complete_info()["selected"] == -1 then
-			return vim.api.nvim_replace_termcodes("<C-n><C-y>", true, true, true)
-		else
-			return vim.api.nvim_replace_termcodes("<C-y>", true, true, true)
-		end
-	else
-		return vim.api.nvim_replace_termcodes("<CR>", true, true, true)
-	end
-end, { expr = true })
-
-vim.keymap.set('i', '<Tab>', function()
-	return vim.fn.pumvisible() ~= 0 and "<C-n>" or "<Tab>"
-end, { expr = true })
-
-vim.keymap.set('i', '<S-Tab>', function()
-	return vim.fn.pumvisible() ~= 0 and "<C-p>" or "<S-Tab>"
-end, { expr = true })
--- AutoComplete
+-- Completion
 
 -- Autoclose
 local function autoclose_pair(open, close)
