@@ -72,21 +72,10 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 vim.opt.cmdheight = 0
 
 require("gruvbox").setup({
-	transparent_mode = false,
-	palette_overrides = {
-		dark0 = "#000000", -- AMOLED black background
-	}
+	transparent_mode = true,
 })
 vim.opt.background = "dark"
 vim.cmd.colorscheme("gruvbox")
-
--- AMOLED black background for UI elements
-vim.cmd([[
-	highlight Normal guibg=#000000
-	highlight NonText guibg=#000000
-	highlight Normal ctermbg=none
-	highlight NonText ctermbg=none
-]])
 
 -- Tabline customization
 vim.api.nvim_set_hl(0, "TabLine", {
