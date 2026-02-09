@@ -50,6 +50,7 @@
                   nvim-lspconfig
                   blink-cmp              # Completion plugin
                   friendly-snippets      # Snippet collection
+                  fidget-nvim            # LSP progress notifications
                 ];
               };
             };

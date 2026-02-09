@@ -130,6 +130,15 @@ vim.keymap.set({ "n" }, "<leader>ntt", function()
 	terminal_window = vim.api.nvim_get_current_win()
 end, { desc = "New terminal tab" })
 
+-- LSP progress notifications
+require("fidget").setup({
+	notification = {
+		window = {
+			winblend = 0, -- Transparent background
+		},
+	},
+})
+
 -- LSP
 vim.keymap.set('n', '<leader>F', vim.lsp.buf.format)
 
