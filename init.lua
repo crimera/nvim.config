@@ -339,7 +339,14 @@ require "mini.pick".setup({
 	}
 })
 
-vim.keymap.set('n', '<C-p>', ":Pick files<CR>")
+vim.keymap.set('n', '<C-p>', function()
+	require('mini.pick').builtin.files({
+		tool = 'fd',
+		options = { '--type', 'f', '--hidden', '--no-ignore' }
+	}, {
+		source = { name = 'All Files' }
+	})
+end, { desc = "Find all files" })
 vim.keymap.set('n', '<leader>f', ":Pick grep_live<CR>")
 vim.keymap.set('n', '<leader> ', ":Pick buffers<CR>")
 -- Mini Pick

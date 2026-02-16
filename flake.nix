@@ -18,6 +18,7 @@
 
           extraPackages = with pkgs; [
             nixd # Nix LSP
+            fd # Fast finder
             ty # python typechecker
             ruff # python linter and formatter
             lua-language-server
