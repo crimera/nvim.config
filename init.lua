@@ -170,8 +170,8 @@ require("gitsigns").setup({
 	},
 	-- Enable line number highlighting
 	numhl = true,
-	-- Enable line highlighting (colors the entire line background)
-	linehl = true,
+	-- Disable line highlighting (no background colors on diff lines)
+	linehl = false,
 	-- Enable word diff in virtual text (inline word-level highlighting)
 	word_diff = true,
 	on_attach = function(bufnr)
