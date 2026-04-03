@@ -30,6 +30,8 @@
             rust-analyzer
           ];
 
+          extraPaths = pkgs.lib.makeBinPath extraPackages + pkgs.lib.optionalString pkgs.stdenv.isDarwin ":/opt/homebrew/bin";
+
           # Define your custom Neovim
           myNeovim = pkgs.neovim.override {
             configure = {
@@ -55,10 +57,7 @@
                 ];
               };
             };
-            extraMakeWrapperArgs = pkgs.lib.concatStringsSep " " [
-              "--suffix" "PATH" ":" (pkgs.lib.makeBinPath extraPackages)
-            ];
-
+            extraMakeWrapperArgs = "--suffix PATH : ${extraPaths}";
           };
         in
         {
