@@ -174,7 +174,7 @@ require("gitsigns").setup({
 	-- Disable line highlighting (no background colors on diff lines)
 	linehl = false,
 	-- Enable word diff in virtual text (inline word-level highlighting)
-	word_diff = true,
+	word_diff = false,
 	on_attach = function(bufnr)
 		local gs = package.loaded.gitsigns
 		
