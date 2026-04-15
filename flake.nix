@@ -3,10 +3,14 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    fffNvim = {
+      url = "github:dmtrKovalenko/fff.nvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    { self, nixpkgs }:
+    { self, nixpkgs, fffNvim }:
     let
       systems = [ "aarch64-darwin" "aarch64-linux" "x86_64-linux" ];
       forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f system);
@@ -54,6 +58,7 @@
                   blink-cmp              # Completion plugin
                   friendly-snippets      # Snippet collection
                   fidget-nvim            # LSP progress notifications
+                  fffNvim.packages.${system}.fff-nvim  # Fast fuzzy file finder and live grep
                 ];
               };
             };

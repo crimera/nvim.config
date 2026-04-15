@@ -340,15 +340,20 @@ require "mini.pick".setup({
 	}
 })
 
-vim.keymap.set('n', '<C-p>', function()
-	require('mini.pick').builtin.files({
-		tool = 'fd',
-		options = { '--type', 'f', '--hidden', '--no-ignore' }
-	}, {
-		source = { name = 'All Files' }
-	})
-end, { desc = "Find all files" })
-vim.keymap.set('n', '<leader>f', ":Pick grep_live<CR>")
+vim.keymap.set('n', '<C-p>', function() require('fff').find_files() end, { desc = 'Find all files with FFF' })
+
+-- FFF (fast fuzzy file finder)
+require('fff').setup({
+	layout = {
+		width = 0.8,
+		height = 0.8,
+		prompt_position = 'bottom',
+		preview_position = 'right',
+	},
+})
+
+vim.keymap.set('n', '<leader>f', function() require('fff').live_grep() end, { desc = '[F]FF Live grep' })
+vim.keymap.set('n', '<leader>F', function() require('fff').find_files() end, { desc = '[F]FF Find files' })
 vim.keymap.set('n', '<leader> ', ":Pick buffers<CR>")
 -- Mini Pick
 
