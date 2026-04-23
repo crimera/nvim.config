@@ -353,7 +353,7 @@ require('fff').setup({
 })
 
 vim.keymap.set('n', '<leader>f', function() require('fff').live_grep() end, { desc = '[F]FF Live grep' })
-vim.keymap.set('n', '<leader>F', function() require('fff').find_files() end, { desc = '[F]FF Find files' })
+-- vim.keymap.set('n', '<leader>F', function() require('fff').find_files() end, { desc = '[F]FF Find files' })
 vim.keymap.set('n', '<leader> ', ":Pick buffers<CR>")
 -- Mini Pick
 
