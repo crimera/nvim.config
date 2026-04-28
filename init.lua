@@ -155,6 +155,7 @@ vim.lsp.enable('jsonls')
 vim.lsp.enable('zls')
 vim.lsp.enable('rust_analyzer')
 vim.lsp.enable('kotlin_lsp')
+vim.lsp.enable('gopls')
 -- LSP
 
 -- Mini Git (provides git status data)
