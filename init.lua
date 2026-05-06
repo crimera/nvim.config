@@ -42,10 +42,10 @@ else
 end
 
 -- Diagnostic keymaps
-vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to previous [D]iagnostic message" })
-vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Go to next [D]iagnostic message" })
-vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { desc = "Show diagnostic [E]rror messages" })
-vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
+vim.keymap.set('n', '[d', function() vim.diagnostic.jump({ count = -1 }) end, { desc = 'Go to previous [D]iagnostic message' })
+vim.keymap.set('n', ']d', function() vim.diagnostic.jump({ count = 1 }) end, { desc = 'Go to next [D]iagnostic message' })
+vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
+vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
 --  See `:help wincmd` for a list of all window commands
 vim.keymap.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move focus to the left window" })
@@ -140,7 +140,44 @@ require("fidget").setup({
 })
 
 -- LSP
+local blink_cmp = require('blink.cmp')
+
+local function with_rounded_border(handler)
+	return function(err, result, ctx, config)
+		local opts = vim.tbl_deep_extend('force', config or {}, { border = 'rounded' })
+		return handler(err, result, ctx, opts)
+	end
+end
+
+vim.lsp.handlers['textDocument/hover'] = with_rounded_border(vim.lsp.handlers.hover)
+vim.lsp.handlers['textDocument/signatureHelp'] = with_rounded_border(vim.lsp.handlers.signature_help)
+vim.lsp.config('*', { capabilities = blink_cmp.get_lsp_capabilities() })
+
 vim.keymap.set('n', '<leader>F', vim.lsp.buf.format)
+
+-- LSP keymaps (buffer-local, set on attach)
+vim.api.nvim_create_autocmd('LspAttach', {
+	desc = 'LSP keymaps',
+	callback = function(event)
+		local client = vim.lsp.get_client_by_id(event.data.client_id)
+		if not client then return end
+
+		local opts = { buffer = event.buf }
+
+		-- Navigation
+		vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+		vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+		vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+		vim.keymap.set('n', 'grt', vim.lsp.buf.type_definition, opts)
+		-- Note: grr, grn, gra are built-in defaults
+
+		-- Info
+		vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+		vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
+
+		-- Formatting is global via <leader>F
+	end,
+})
 
 vim.lsp.enable('nixd')
 vim.lsp.enable('lua_ls')
@@ -153,8 +190,38 @@ vim.lsp.enable('oxlint')
 vim.lsp.enable('html')
 vim.lsp.enable('jsonls')
 vim.lsp.enable('zls')
+local kotlin_root_markers = {
+	'settings.gradle',
+	'settings.gradle.kts',
+	'pom.xml',
+	'build.gradle',
+	'build.gradle.kts',
+}
+local kotlin_lsp_system_path = vim.fs.joinpath(vim.fn.stdpath('cache'), 'kotlin-lsp')
+
+vim.lsp.config('kotlin_lsp', {
+	cmd = { 'kotlin-lsp', '--stdio', '--system-path', kotlin_lsp_system_path, '--log-level', 'INFO' },
+	filetypes = { 'kotlin' },
+	root_markers = kotlin_root_markers,
+	detached = false,
+	single_file_support = false,
+})
+
+vim.api.nvim_create_autocmd('FileType', {
+	pattern = 'kotlin',
+	callback = function(event)
+		local root_dir = vim.fs.root(event.buf, { 'settings.gradle', 'settings.gradle.kts' })
+			or vim.fs.root(event.buf, kotlin_root_markers)
+		if not root_dir then return end
+
+		vim.lsp.start(vim.tbl_extend('force', vim.lsp.config.kotlin_lsp, {
+			root_dir = root_dir,
+			cmd_cwd = root_dir,
+		}), { bufnr = event.buf })
+	end,
+})
+
 vim.lsp.enable('rust_analyzer')
-vim.lsp.enable('kotlin_lsp')
 vim.lsp.enable('gopls')
 -- LSP
 
@@ -359,7 +426,9 @@ vim.keymap.set('n', '<leader> ', ":Pick buffers<CR>")
 -- Mini Pick
 
 -- Completion (blink.cmp)
-require("blink.cmp").setup({
+local blink_completion_kind = require('blink.cmp.types').CompletionItemKind
+
+blink_cmp.setup({
 	keymap = {
 		preset = "enter",  -- Enter to accept completion
 		["<Tab>"] = { "select_next", "fallback" },
@@ -388,16 +457,17 @@ require("blink.cmp").setup({
 
 	sources = {
 		default = { "lsp", "path", "snippets", "buffer" },
-		-- Filter out unwanted completion kinds (Text and Snippet)
 		providers = {
 			lsp = {
+				fallbacks = {},
 				transform_items = function(_, items)
-					-- Filter out Text (1) and Snippet (15) completion kinds
 					return vim.tbl_filter(function(item)
-						local kind = item.kind
-						return kind ~= 1 and kind ~= 15
+						return item.kind ~= blink_completion_kind.Snippet
 					end, items)
 				end,
+			},
+			buffer = {
+				score_offset = -5,
 			},
 		},
 	},
